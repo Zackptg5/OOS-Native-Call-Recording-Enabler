@@ -70,20 +70,16 @@ else
 fi
 
 # determine install or uninstall
-test -f ncrindicator && ACTION=Uninstall
+test "$(grep "NCRINDICATOR" $overlay/init.rc)" && ACTION=Uninstall
 
 # begin ramdisk changes
 if [ -z $ACTION ]; then
-  # Add indicator
-  touch ncrindicator
-
   # Add line to init.rc
   backup_file $overlay/init.rc
   ui_print "Enabling NCR..."
   append_file init.rc "enable_native_call_recording_oos" ncrpatch
 else
   ui_print "Removing NCR..."
-  rm -f ncrindicator $ramdisk/init.ncr.sh
   restore_file $overlay/init.rc
 fi
 
