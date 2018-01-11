@@ -9,11 +9,12 @@ do.devicecheck=1
 do.modules=0
 do.cleanup=1
 do.cleanuponabort=1
-device.name1=OnePlus5
-device.name2=OnePlus5T
-device.name3=
-device.name4=
-device.name5=			 
+device.name1=OnePlus5T
+device.name2=dumpling
+device.name3=Dumpling	 
+device.name4=OnePlus5
+device.name5=cheeseburger
+device.name6=Cheeseburger
 } # end properties
 
 # shell variables
