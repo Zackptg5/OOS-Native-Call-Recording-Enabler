@@ -1,10 +1,8 @@
-service NCR /system/bin/sh -c "settings put global op_voice_recording_supported_by_mcc 1"
-    # NCRINDICATOR
+service Native_Call_Recording /system/bin/sh -c "settings put global op_voice_recording_supported_by_mcc 1"
     seclabel u:r:su:s0
-    class late_start
     user root
-    disabled
     oneshot
+    disabled
 
 on property:sys.boot_completed=1
-    start NCR
+    start Native_Call_Recording

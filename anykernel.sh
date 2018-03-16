@@ -48,45 +48,9 @@ dump_boot
 # File list
 list="init.rc"
 
-# Slot device support
-if [ ! -z $slot ]; then            
-  if [ -d $ramdisk/.subackup -o -d $ramdisk/.backup ]; then
-    patch_cmdline "skip_override" "skip_override"
-  else
-    patch_cmdline "skip_override" ""
-  fi
-  # Overlay stuff
-  if [ -d $ramdisk/.backup ]; then
-    overlay=$ramdisk/overlay
-  elif [ -d $ramdisk/.subackup ]; then
-    overlay=$ramdisk/boot
-  fi
-  for rdfile in $list; do
-    rddir=$(dirname $rdfile)
-    mkdir -p $overlay/$rddir
-    test ! -f $overlay/$rdfile && cp -rp /system/$rdfile $overlay/$rddir/
-  done                       
-else
-  overlay=$ramdisk
-fi
-
-# Detect if boot.img is signed - credits to chainfire @xda-developers
-unset LD_LIBRARY_PATH
-BOOTSIGNATURE="/system/bin/dalvikvm -Xbootclasspath:/system/framework/core-oj.jar:/system/framework/core-libart.jar:/system/framework/conscrypt.jar:/system/framework/bouncycastle.jar -Xnodex2oat -Xnoimage-dex2oat -cp $bin/avb-signing/BootSignature_Android.jar com.android.verity.BootSignature"
-if [ ! -f "/system/bin/dalvikvm" ]; then
-  # if we don't have dalvikvm, we want the same behavior as boot.art/oat not found
-  RET="initialize runtime"
-else
-  RET=$($BOOTSIGNATURE -verify /tmp/anykernel/boot.img 2>&1)
-fi
-test ! -z $slot && RET=$($BOOTSIGNATURE -verify /tmp/anykernel/boot.img 2>&1)
-if (`echo $RET | grep "VALID" >/dev/null 2>&1`); then
-  ui_print "Signed boot img detected!"
-  mv -f $bin/avb-signing/avb $bin/avb-signing/BootSignature_Android.jar $bin
-fi
 
 # determine install or uninstall
-test "$(grep "NCRINDICATOR" $overlay/init.rc)" && ACTION=Uninstall
+[ "$(grep 'service Native_Call_Recording' $overlay/init.rc)" ] && ACTION=Uninstall
 
 # begin ramdisk changes
 if [ -z $ACTION ]; then
@@ -96,7 +60,7 @@ if [ -z $ACTION ]; then
   append_file init.rc "enable_native_call_recording_oos" ncrpatch
 else
   ui_print "Removing NCR..."
-  restore_file $overlay/init.rc
+  sed -i "/service Native_Call_Recording/,/start Native_Call_Recording/d" $overlay/init.rc
 fi
 
 # end ramdisk changes
