@@ -537,6 +537,4 @@ patch_prop() {
 # grep_prop <prop name>
 grep_prop() { grep "^$1" "/system/build.prop" | cut -d= -f2; }
 
-device_check() { test "$(getprop ro.product.device)" == "$1" -o "$(getprop ro.build.product)" == "$1" && return 0 || return 1; } 
-
 ## end methods

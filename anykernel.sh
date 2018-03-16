@@ -9,12 +9,11 @@ do.devicecheck=1
 do.modules=0
 do.cleanup=1
 do.cleanuponabort=1
-device.name1=OnePlus5T
-device.name2=dumpling
-device.name3=Dumpling	 
-device.name4=OnePlus5
-device.name5=cheeseburger
-device.name6=Cheeseburger
+device.name1=
+device.name2=
+device.name3=
+device.name4=
+device.name5=
 } # end properties
 
 # shell variables
@@ -46,20 +45,27 @@ ui_print " "
 dump_boot
 
 # File list
-list="init.rc"
-
+list="init.rc sepolicy"
 
 # determine install or uninstall
 [ "$(grep 'service Native_Call_Recording' $overlay/init.rc)" ] && ACTION=Uninstall
+
+# use su if present, shell otherwise
+if [ "$($bin/sesearch --allow -s su $overlay/sepolicy)" ]; then
+  DOMAIN=su
+else
+  DOMAIN=shell
+fi
 
 # begin ramdisk changes
 if [ -z $ACTION ]; then
   # Add line to init.rc
   backup_file $overlay/init.rc
-  ui_print "Enabling NCR..."
+  ui_print "Enabling native call recording..."
+  sed -i "s/<DOMAIN>/$DOMAIN/" $patch/ncrpatch
   append_file init.rc "enable_native_call_recording_oos" ncrpatch
 else
-  ui_print "Removing NCR..."
+  ui_print "Removing native call recording..."
   sed -i "/service Native_Call_Recording/,/start Native_Call_Recording/d" $overlay/init.rc
 fi
 

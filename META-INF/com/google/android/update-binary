@@ -121,18 +121,10 @@ mount /data 2>/dev/null;
 
 if [ "$(file_getprop /tmp/anykernel/anykernel.sh do.devicecheck)" == 1 ]; then
   ui_print "Checking device...";
-  for i in 1 2 3 4 5 6; do
-    testname="$(file_getprop /tmp/anykernel/anykernel.sh device.name$i)";
-    if [ "$(getprop ro.product.device)" == "$testname" -o "$(getprop ro.build.product)" == "$testname" ]; then
-      ui_print "$testname";
-      match=1;
-      break;
-    fi;
-  done;
   ui_print " ";
-  if [ "$match" != 1 ]; then
-    abort "Unsupported device. Aborting...";
-  fi;
+  [ "$(getprop ro.product.manufacturer)" == "OnePlus" -o "$(getprop ro.product.brand)" == "OnePlus)" ] || abort "Unsupported device. Aborting...";
+  ui_print "OnePlus device detected!"
+  ui_print " ";
 fi;
 
 for i in $($bb --list); do
