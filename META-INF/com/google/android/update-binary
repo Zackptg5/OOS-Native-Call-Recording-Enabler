@@ -70,7 +70,7 @@ mount_partitions() {
   find_boot_image
   find_dtbo_image
   [ -z $SLOT ] || ui_print "A/B partition detected, current slot: $SLOT"
-  ui_print "Mounting /system, /vendor"
+  ui_print "Mounting /system"
   is_mounted /system || [ -f /system/build.prop ] || mount -o rw /system 2>/dev/null
   if ! is_mounted /system && ! [ -f /system/build.prop ]; then
     SYSTEMBLOCK=`find /dev/block -iname system$SLOT | head -n 1`
@@ -85,22 +85,12 @@ mount_partitions() {
     mount -o bind /system_root/system /system
   fi
   $SKIP_INITRAMFS && ui_print "Device skip_initramfs detected"
-  if [ -L /system/vendor ]; then
-    # Seperate /vendor partition
-    is_mounted /vendor || mount -o rw /vendor 2>/dev/null
-    if ! is_mounted /vendor; then
-      VENDORBLOCK=`find /dev/block -iname vendor$SLOT | head -n 1`
-      mount -t ext4 -o rw $VENDORBLOCK /vendor
-    fi
-    is_mounted /vendor || abort "! Cannot mount /vendor"
-  fi
 }
 
 unmount_partitions() {
   ui_print "Unmounting partitions"
   umount -l /system_root 2>/dev/null
   umount -l /system 2>/dev/null
-  umount -l /vendor 2>/dev/null
   rm -rf /dev/tmp
 }
 
@@ -121,20 +111,14 @@ ui_print " "
 mount_partitions
 [ "$(grep "ro.build.version.ota=OnePlus" /system/build.prop)" -o "$(grep "ro.product.brand=OnePlus" /system/build.prop)" ] && [ "$(grep "ro.build.version.ota=.*Oxygen" /system/build.prop)" ] || abort "!Unsupported device. Aborting!"
 
-if [ -d /system/vendor/etc/init ]; then
-  DIR=/system/vendor/etc/init
-else
-  DIR=/system/etc/init
-fi
-
-if [ -f "$DIR/init.ncr.rc" ]; then
+if [ -f "/system/etc/init/init.ncr.rc" ]; then
   ui_print "Removing native call recording"
-  rm -f $DIR/init.ncr.rc
+  rm -f /system/etc/init/init.ncr.rc
 else
   ui_print "Adding native call recording"
-  cp -f $ZIP/init.ncr.rc $DIR/init.ncr.rc
-  chmod 0644 $DIR/init.ncr.rc
-  chcon u:object_r:vendor_configs_file:s0 $DIR/init.ncr.rc
+  cp -f $ZIP/init.ncr.rc /system/etc/init/init.ncr.rc
+  chmod 0644 /system/etc/init/init.ncr.rc
+  chcon u:object_r:system_file:s0 /system/etc/init/init.ncr.rc
 fi
 
 unmount_partitions

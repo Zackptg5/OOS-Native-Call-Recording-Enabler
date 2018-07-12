@@ -1,4 +1,4 @@
-service Native_Call_Recording /system/bin/sh -c "settings put global op_voice_recording_supported_by_mcc 1"
+service Native_Call_Recording /system/bin/sh -c "sleep 5 && settings put global op_voice_recording_supported_by_mcc 1"
     seclabel u:r:shell:s0
     user root
     oneshot
